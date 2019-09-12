@@ -1,0 +1,24 @@
+{
+  "name": "openlawnz-search",
+  "version": "1.0.0",
+  "description": "API for openlawnz search engine",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openlawnz/openlawnz-search.git"
+  },
+  "author": "Ed Haslam",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/openlawnz/openlawnz-search/issues"
+  },
+  "homepage": "https://github.com/openlawnz/openlawnz-search#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "node-postgres": "0.0.1"
+  }
+}
