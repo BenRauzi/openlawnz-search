@@ -10,6 +10,7 @@ Some environment variables need to be set:
 * DB_PASS
 * SCHEMA
 * PORT
+
 Then:
 ```
 npm install
