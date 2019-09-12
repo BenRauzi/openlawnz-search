@@ -1,6 +1,6 @@
 # openlawnz-search
 
-## Building the search app
+## How to run
 Schema inside /sql needs to be run in to the case database
 Some environment variables need to be set:
 * DB_HOST
@@ -15,4 +15,9 @@ Then:
 ```
 npm install
 npm start
+```
+
+## Usage
+```
+GET http://localhost:8085/cases?search=driveway&start=0&end=10
 ```
