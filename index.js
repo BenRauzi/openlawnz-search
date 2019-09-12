@@ -94,4 +94,6 @@ app.get('/cases', (req, res) => {
         });
 });
 
-app.listen(PORT, () => { `Running on port ${PORT}` });
+app.listen(PORT, () =>{
+    console.log(`Running on port ${PORT}`)
+});
