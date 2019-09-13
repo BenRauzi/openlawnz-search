@@ -3,9 +3,9 @@ const Pool = require('pg').Pool;
 
 const app = express();
 const DB_HOST = process.env.DB_HOST || 'localhost'
-const DB_PORT = process.env.DB_PORT || 5000
+const DB_PORT = process.env.DB_PORT || 5432
 const DB_NAME = process.env.DB_NAME || 'cases'
-const DB_USER = process.env.DB_USER || 'root'
+const DB_USER = process.env.DB_USER || 'postgres'
 const DB_PASS = process.env.DB_PASS
 const SCHEMA = process.env.SCHEMA || 'cases'
 const PORT = process.env.PORT || 8085
@@ -15,6 +15,22 @@ const maxSearchLength = 160
 const maxPageSize = 50
 const defaultPageSize = 20;
 
+const pool = new Pool({
+    user: DB_USER,
+    host: DB_HOST,
+    database: DB_NAME,
+    password: DB_PASS,
+    port: DB_PORT
+});
+
+function logInternalError(err,res) {
+    console.error(err);
+    res.status(500).send('Internal server error');
+}
+
+app.use(function(err, req, res, next) {
+    logInternalError(err,res);
+})
 
 app.get('/cases', (req, res) => {
     var rawStart = parseInt(req.query.start)
@@ -38,6 +54,8 @@ app.get('/cases', (req, res) => {
         var end = start+defaultPageSize;
     } else if (rawEnd > start+maxPageSize) {
         var end = start+maxPageSize;
+    } else if (rawEnd < start) {
+        var end = 0;
     } else {
         var end = rawEnd;
     }
@@ -48,13 +66,32 @@ app.get('/cases', (req, res) => {
         var search = rawSearch;
     }
 
-    var results = getCases(start,end,search);
-    
-    return res.send(results);
-});
+    pool.query(
+        'SELECT * FROM cases.cases.get_search_results($1,$2,$3)',
+        [search,start,end],
+        (error,results) => {
+            
+            if (error) {
+                return logInternalError(error,res);
+            }
 
-function getCases(start,end,search) {
-    return { total: 999999, results: [ { caseName: "hello", citation: "citation", date: "1/1/1982" } ] };
-}
+            var rows = results.rows;
+
+            if(typeof(rows) == "undefined" || rows.length==0)
+                return res.status(200).send({ total: 0, results: []});
+            
+            return res.status(200).send({
+                total: rows[0].total_matches,
+                results: rows.map((row) => {
+                    return {
+                        caseId: row.case_id,
+                        caseName: row.case_name,
+                        citation: row.citation,
+                        date: row.date
+                    };
+                })
+            });
+        });
+});
 
 app.listen(PORT, () => { `Running on port ${PORT}` });
