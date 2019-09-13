@@ -25,8 +25,8 @@ as
 		on co.id=co2ca.id
 	left join cases.cases.case_citations cc
 		on cc.case_id=ca.id
-	group by ca.id, cc.citation
+	group by ca.id, cc.citation;
 	
 create index idx_case_search_documents_document 
 on cases.cases.case_search_documents
-using gin ("document")
+using gin ("document");
