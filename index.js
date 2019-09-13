@@ -12,8 +12,8 @@ const PORT = process.env.PORT || 8085
 
 // search parameter constants
 const maxSearchLength = 160
-const maxPageSize = 50
-const defaultPageSize = 20;
+const maxPageSize = 5
+const defaultPageSize = 2;
 
 const pool = new Pool({
     user: DB_USER,
