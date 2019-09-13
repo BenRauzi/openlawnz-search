@@ -26,7 +26,6 @@ as
 	left join cases.cases.case_citations cc
 		on cc.case_id=ca.id
 	group by ca.id, cc.citation
-	limit 10000
 	
 create index idx_case_search_documents_document 
 on cases.cases.case_search_documents
