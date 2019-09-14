@@ -1,5 +1,6 @@
 const express = require('express');
 const Pool = require('pg').Pool;
+const cors = require('cors');
 
 const app = express();
 const DB_HOST = process.env.DB_HOST || 'localhost'
@@ -27,6 +28,8 @@ function logInternalError(err,res) {
     console.error(err);
     res.status(500).send('Internal server error');
 }
+
+app.use(cors());
 
 app.use(function(err, req, res, next) {
     logInternalError(err,res);
