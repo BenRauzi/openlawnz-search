@@ -19,5 +19,5 @@ npm start
 
 ## Usage
 ```
-GET http://<host>/cases?search=driveway&start=0&end=10
+GET https://<host>/cases?search=driveway&start=0&end=10
 ```
