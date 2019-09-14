@@ -90,7 +90,7 @@ app.get('/cases', (req, res) => {
                         caseId: row.case_id,
                         caseName: row.case_name,
                         citation: row.citation,
-                        date: row.date
+                        date: row.case_date
                     };
                 })
             });
