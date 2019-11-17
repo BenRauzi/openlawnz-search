@@ -1,6 +1,7 @@
 # openlawnz-search
 
 
+
 ## How to run
 Schema inside /sql needs to be run in to the case database
 Some environment variables need to be set:
