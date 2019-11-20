@@ -31,5 +31,5 @@ jobs:
       uses: ybrin/secure-actions-webhook@0.1.2
       env:
         REQUEST_URI: ${{ secrets.WEBHOOK_URL }}
-        REQUEST_DATA: '{ "key1": ${{secrets.GUID}} }'
+        REQUEST_DATA: '{ "guid": ${{secrets.GUID}} }'
         HMAC_SECRET: "secret_used_to_generate_signature"
