@@ -1,32 +1,46 @@
 # openlawnz-search
+## Structure
+openlawnz-search has two components - a public-facing search app which handles search queries over HTTP, and a maintenance app which provides some methods for creating search schema and adding cases to the search engine.
 
-## Database Setup
-We use Docker to download and provision the OpenLaw NZ database. Simply run docker.sh from [openlawnz-orchestration](https://github.com/openlawnz/openlawnz-orchestration) and then update your .env file.
+## Development setup
+### Database
+openlawnz-search uses PostgreSQL for its search indices. In order to run this app, you must provide a running PostgreSQL database server.
 
-There are 2 schemas:
-
-`pipeline_cases`: this is populated by running the pipeline and is not affected by the parsers  
-`cases`: this is populated and mutated by running the parsers  
-And check if it has correctly restored SQL dump file.
-
-## How to run
-Schema inside /sql needs to be run in to the case database
-Some environment variables need to be set:
-* DB_HOST
-* DB_PORT
-* DB_NAME
-* DB_USER
-* DB_PASS
-* SCHEMA
-* PORT
-
-Then:
+### How to run
+Some scripts are provided to run the search app for development. Run them in order:
 ```
-npm install
-npm start
+sh build_test_server.sh <db_server_port> <db_name> <db_user> <db_password>
+sh run_search_server.sh <db_server_port> <db_name> <db_user> <db_password>
 ```
 
 ## Usage
+There are four main search APIs currently available.
+Each search API supports paging of results through ```start``` and ```end``` query string parameters.
+
+### Case search
 ```
-GET https://<host>/cases?search=driveway&start=0&end=10
+GET https://<host>/cases?search=<search string>
+```
+#### Search filters
+Case search results can be filtered by the following query string parameters:
+* ```case_title```
+* ```court```
+* ```legislation_act```
+* ```legislation_section```
+* ```judgment_date_from```
+* ```judgment_date_to```
+
+### Case title search
+```
+GET https://<host>/cases/titles?search=<search string>
+```
+
+### Legislation act search
+```
+GET https://<host>/legislation/acts?search=<search string>
+```
+
+### Legislation section search
+```
+GET https://<host>/legislation/acts/<act name>/sections?search=<search string>
 ```
