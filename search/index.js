@@ -205,7 +205,9 @@ app.get('/cases', (req, res, next) => {
     var pagination = getPaginationFromQuery(req)
     var query = pg
         .from(pg.raw(`search.case_search_documents s, plainto_tsquery('english',?) query`, [search]))
-        .whereRaw('query @@ "full_text_search_document"');
+
+    if (isDefined(search))
+        query.whereRaw('query @@ "full_text_search_document"');
     
     if (isDefined(req.query.case_title))
         equalsJson(query,'case_name',req.query.case_title)
