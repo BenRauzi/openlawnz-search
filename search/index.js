@@ -133,7 +133,10 @@ app.get('/legislation/acts', (req, res, next) => {
 
     var query = pg
         .from(pg.raw(`search.legislation_documents s, plainto_tsquery('english',?) query`, [search]))
-        .whereRaw('query @@ search_document')
+
+    if (search != "")
+        query.whereRaw('query @@ search_document')
+
     var countQuery = createCountQuery(query.clone())
     var searchQuery = createSearchQuery(query.clone(), pagination)
         .select(pg.raw(`ts_rank_cd('{0.5,0.7,0.9,1.0}',search_document,query) AS RANK`))
@@ -142,7 +145,7 @@ app.get('/legislation/acts', (req, res, next) => {
     handleSearchQuery(
         searchQuery,
         countQuery,
-        (row) => { return { legislationTitle: row.title  }},
+        (row) => { return { actName: row.title  }},
         next,
         res)
 })
@@ -168,7 +171,7 @@ app.get('/legislation/acts/:actTitle/sections', (req, res, next) => {
         countQuery,
         (row) => {
             return {
-                act: row.title,
+                actName: row.title,
                 section: row.section
             }
         },
@@ -176,12 +179,15 @@ app.get('/legislation/acts/:actTitle/sections', (req, res, next) => {
         res)
 })
 
-app.get('/cases/titles', (req, res, next) => {
+app.get('/cases/names', (req, res, next) => {
     var pagination = getPaginationFromQuery(req);
     var search = getSearchString(req)
     var query = pg
         .from(pg.raw(`search.case_search_documents s, plainto_tsquery('english',?) query`, [search]))
-        .whereRaw('query @@ "case_name_search_document"')
+
+    if (search !== '')
+        query.whereRaw('query @@ "case_name_search_document"')
+
     var countQuery = createCountQuery(query.clone())
     var searchQuery = createSearchQuery(query.clone(), pagination)
         .select(pg.raw(`ts_rank_cd('{0.5,0.7,0.9,1.0}',"case_name_search_document",query) AS RANK`))
@@ -206,10 +212,10 @@ app.get('/cases', (req, res, next) => {
     var query = pg
         .from(pg.raw(`search.case_search_documents s, plainto_tsquery('english',?) query`, [search]))
 
-    if (isDefined(search))
+    if (search !== "")
         query.whereRaw('query @@ "full_text_search_document"');
     
-    if (isDefined(req.query.case_title))
+    if (isDefined(req.query.case_name))
         equalsJson(query,'case_name',req.query.case_title)
     if (isDefined(req.query.court))
         equalsJson(query,'court',req.query.court)
