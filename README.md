@@ -23,7 +23,7 @@ GET https://<host>/cases?search=<search string>
 ```
 #### Search filters
 Case search results can be filtered by the following query string parameters:
-* ```case_title```
+* ```case_name```
 * ```court```
 * ```legislation_act```
 * ```legislation_section```
@@ -32,7 +32,7 @@ Case search results can be filtered by the following query string parameters:
 
 ### Case title search
 ```
-GET https://<host>/cases/titles?search=<search string>
+GET https://<host>/cases/names?search=<search string>
 ```
 
 ### Legislation act search
