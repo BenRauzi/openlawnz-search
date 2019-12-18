@@ -3,11 +3,34 @@ var fetch = require('node-fetch')
 const PORT = process.env.OPENLAW_SEARCH_PORT | 8085
 
 const testResponseNotEmpty = [r => r.results.length>0 && r.total>0, "Must return results when 'search' parameter not provided"]
-const testResponseFieldsDefined = fields => [r => r.results.every(e => fields(e).every(isDefined)), "Must return correct fields per result"]      
+const testNumberOfResponses = n => [r => r.results.length==n, `Must return ${n} responses`]
+const testResponseFieldsDefined = fields => [r => r.results.every(e => fields(e).every(isDefined)), "Must return correct fields per result"]
+const testResponseMatches = matchEntries => [r => matchEntries
+                                             .every(me => r.results
+                                                    .some(re => Object.entries(me)
+                                                          .every(fme => Object.entries(re)
+                                                                 .some(rme => rme[0]==fme[0] && rme[1]==fme[1])
+                                                                )
+                                                         )
+                                                   ),
+                                             `Must include responses: ${JSON.stringify(matchEntries)}`
+                                            ]
 
 var requestsAndTests = [
     [
         '/cases?search=test', []
+    ],
+    [
+        '/cases?case_name=SMITH', [testResponseNotEmpty, testResponseMatches([
+            {caseName: "SMITH v ACCESSIBLE PROPERTIES NEW ZEALAND LIMITED [2019] NZCA 38 [8 March 2019]"},
+            {caseName: "SMITH v SMITH [2019] NZHC 320 [1 March 2019]"},
+            {caseName: "PGG WRIGHTSON SEEDS LTD v WHOLESALE SEEDS LTD & SMITH [2019] NZHC 377 [8 March 2019]"}
+        ])]
+    ],
+    [
+        '/cases?case_name=SMITH v SMITH [2019] NZHC 320 [1 March 2019]', [testNumberOfResponses(1), testResponseMatches([
+            {caseName: "SMITH v SMITH [2019] NZHC 320 [1 March 2019]"}
+        ])]
     ],
     [
         '/cases', [testResponseFieldsDefined(e => [e.caseId,e.caseName,e.citation,e.date]),testResponseNotEmpty]
