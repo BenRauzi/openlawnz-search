@@ -246,12 +246,12 @@ app.get('/cases', (req, res, next) => {
     if (isDefined(req.query.judgment_date_from)) {
         var date = new Date(req.query.judgment_date_from)
         if (!isNaN(date))
-            query.whereRaw("document->>'case_date' > ?",date)
+            query.whereRaw("document->>'date' > ?",date)
     }
     if (isDefined(req.query.judgment_date_to)) {
         var date = new Date(req.query.judgment_date_to)
         if (!isNaN(date))
-            query.whereRaw("document->>'case_date' < ?",date)
+            query.whereRaw("document->>'date' < ?",date)
     }
 
     var countQuery = createCountQuery(query.clone())

@@ -39,6 +39,11 @@ var requestsAndTests = [
         ])]
     ],
     [
+        '/cases?court=Supreme Court&judgment_date_from=2019-03-19&judgment_date_to=2019-03-20', [testResponseMatches([
+            {caseName: "JOHN GARRY DAVIDOFF v R [2019] NZSC 30 [20 March 2019]"}
+        ])]
+    ],
+    [
         '/cases', [testResponseFieldsDefined(e => [e.caseId,e.caseName,e.citation,e.date]),testResponseNotEmpty]
     ],
     [
