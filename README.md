@@ -22,13 +22,15 @@ Each search API supports paging of results through ```start``` and ```end``` que
 GET https://<host>/cases?search=<search string>
 ```
 #### Search filters
-Case search results can be filtered by the following query string parameters:
-* ```case_name```
+Case search results can be filtered by query string parameters. These filters can either be binary (the filter must match the field exactly) or fuzzy (some part of the filter text must match the field).
+##### Binary filters
 * ```court```
 * ```legislation_act```
 * ```legislation_section```
 * ```judgment_date_from```
 * ```judgment_date_to```
+##### Fuzzy filters
+* ```case_name```
 
 ### Case title search
 ```
