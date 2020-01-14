@@ -238,7 +238,7 @@ app.get('/cases', (req, res, next) => {
     //if (isDefined(req.query.case_name))
     //    equalsJson(query,'case_name',req.query.case_name)
     if (isDefined(req.query.court))
-        equalsJson(query,'court',req.query.court)
+        equalsJson(query,'court_name',req.query.court)
     if (isDefined(req.query.legislation_act))
         query.whereRaw(`document->'legislation' @> ANY(ARRAY [?]::jsonb[])`,`[{"title":"${req.query.legislation_act}"}]`)
     if (isDefined(req.query.legislation_section))

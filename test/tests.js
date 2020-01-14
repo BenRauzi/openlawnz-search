@@ -33,6 +33,12 @@ var requestsAndTests = [
         ])]
     ],
     [
+        '/cases?court=Supreme Court', [testNumberOfResponses(2), testResponseMatches([
+            {caseName: "JOHN GARRY DAVIDOFF v R [2019] NZSC 30 [20 March 2019]"},
+            {caseName: "LAVERY v LAVERY [2019] NZHC 502 [20 March 2019]"}
+        ])]
+    ],
+    [
         '/cases', [testResponseFieldsDefined(e => [e.caseId,e.caseName,e.citation,e.date]),testResponseNotEmpty]
     ],
     [
