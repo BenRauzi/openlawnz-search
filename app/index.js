@@ -71,7 +71,7 @@ function getPaginationFromQuery(req) {
     var rawStart = parseInt(req.query.start)
     var rawEnd = parseInt(req.query.end);
 
-    pagination = {}
+    var pagination = {}
 
     if (isNaN(rawStart)) {
         pagination.start = 0;
