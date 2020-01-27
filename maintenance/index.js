@@ -28,7 +28,7 @@ function deploy() {
                 .raw(content)
                 .then(_ => {
                     console.error("Schema rebuild complete")
-                    process.kill(process.pid, 'SIGTERM')
+                    process.exit()
                 })
                 .catch(err => {
                     onError(err)
@@ -78,7 +78,15 @@ if (require.main == module) {
             })
 
             var sem = 10
+            var closed = false
 
+            readInterface.on('close', () => {
+                closed = true
+
+                if (sem==10)
+                    process.exit()
+            })
+            
             readInterface.on('line', line => {
                 var jsonLine = JSON.parse(line)
                 sem -= 1
@@ -88,18 +96,18 @@ if (require.main == module) {
 
                 addCases(jsonLine)
                     .then(_ => {
+                        console.error(`Read up to ${jsonLine[jsonLine.length-1].case_id}`)
+
                         sem += 1
                         readInterface.resume()
-                        console.error(`Read up to ${jsonLine[jsonLine.length-1].case_id}`)
+
+                        if (sem==10 && closed)
+                            process.exit()
                     })
                     .catch(err => {
                         console.log(err)
                         process.exit(1)
                     })
-            })
-
-            readInterface.on('end', () => {
-                process.exit(0)
             })
         }
     }
