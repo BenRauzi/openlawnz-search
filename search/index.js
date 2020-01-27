@@ -235,8 +235,6 @@ app.get('/cases', (req, res, next) => {
     
     var query = getBaseQuery("search.case_search_documents",searchTerms)    
     
-    //if (isDefined(req.query.case_name))
-    //    equalsJson(query,'case_name',req.query.case_name)
     if (isDefined(req.query.court))
         equalsJson(query,'court_name',req.query.court)
     if (isDefined(req.query.legislation_act))
