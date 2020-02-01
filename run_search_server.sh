@@ -13,9 +13,9 @@ else
 	export DB_PASS="$4"
 	export PORT=8085
 		
-	cd search
+	cd app
 	npm install
 	echo starting server on port $PORT
-	npm start
+ 	npm start
 fi
 
