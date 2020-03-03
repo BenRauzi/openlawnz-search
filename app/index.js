@@ -256,13 +256,15 @@ app.get('/cases', (req, res, next) => {
     var searchQuery = createSearchQuery(query.clone(),pagination)
         .select(pg.raw(`ts_rank_cd('{0.5,0.7,0.9,1.0}',"full_text_search_document",query0) AS RANK`))
         .select('document')
+        .select(pg.raw(`ts_headline(document->'case_text', plainto_tsquery(?), 'MaxFragments=2') AS excerpt`, search))
 
     var resultMapper = row => {
         return {
             caseId: row.document.case_id,
             caseName: row.document.case_name,
             citation: row.document.citation,
-            date: row.document.date
+            date: row.document.date,
+            excerpt: row.excerpt
         }
     }
     
