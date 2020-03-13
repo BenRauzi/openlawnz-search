@@ -121,6 +121,14 @@ function handleSearchQuery(searchQuery, countQuery, resultMapper, next, res)
         });
 }
 
+function addHeadline(field, asField, query, maxFrags, fullField) {
+    var minMax = ''
+    if (fullField)
+        minMax = ',MinWords=999,MaxWords=1000'
+    
+    return pg.raw(`ts_headline(${field}, plainto_tsquery(?), 'MaxFragments=${maxFrags}${minMax}') AS ${asField}`, query)
+}
+
 app.use(cors());
 
 app.use(function(err, req, res, next) {
@@ -256,12 +264,19 @@ app.get('/cases', (req, res, next) => {
     var searchQuery = createSearchQuery(query.clone(),pagination)
         .select(pg.raw(`ts_rank_cd('{0.5,0.7,0.9,1.0}',"full_text_search_document",query0) AS RANK`))
         .select('document')
-        .select(pg.raw(`ts_headline(document->'case_text', plainto_tsquery(?), 'MaxFragments=2') AS excerpt`, search))
+
+    if (search != '')
+        searchQuery
+        .select(addHeadline(`document->'case_text'`,'excerpt',search,2))
+        .select(addHeadline(`document->'case_name'`,'case_name',search,1,true))
+
+    if (req.query.case_name)
+        searchQuery.select(addHeadline(`document->'case_name'`,'case_name',req.query.case_name,1,true))
 
     var resultMapper = row => {
         return {
             caseId: row.document.case_id,
-            caseName: row.document.case_name,
+            caseName: row.case_name ? row.case_name : row.document.case_name,
             citation: row.document.citation,
             date: row.document.date,
             excerpt: row.excerpt

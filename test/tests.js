@@ -2,12 +2,17 @@ var fetch = require('node-fetch')
 
 const PORT = process.env.OPENLAW_SEARCH_PORT | 8085
 
+RegExp.prototype.toJSON = RegExp.prototype.toString
+
 function checkFieldValueMatches(matchValue,resultValue){
-    if(typeof matchValue === 'RegExp')
-	return matchValue.test(resultValue)
+    if(matchValue instanceof RegExp){
+//        console.error(matchValue,resultValue,matchValue.test(resultValue))
+        return matchValue.test(resultValue)
+    }
     return resultValue==matchValue
 }
 
+const testNoField = f => [r => r.results.every(e => !e[f]), `Field '${f}' must not be present`]
 const testResponseNotEmpty = [r => r.results.length>0 && r.total>0, "Must return results when 'search' parameter not provided"]
 const testNumberOfResponses = n => [r => r.results.length==n, `Must return ${n} responses`]
 const testResponseFieldsDefined = fields => [r => r.results.every(e => fields(e).every(isDefined)), "Must return correct fields per result"]
@@ -31,36 +36,38 @@ var requestsAndTests = [
     // test case_name fulltext search returns expected results
     [
         '/cases?case_name=SMITH', [testResponseNotEmpty, testResponseMatches([
-            {caseName: "SMITH v ACCESSIBLE PROPERTIES NEW ZEALAND LIMITED [2019] NZCA 38 [8 March 2019]"},
-            {caseName: "SMITH v SMITH [2019] NZHC 320 [1 March 2019]"},
-            {caseName: "PGG WRIGHTSON SEEDS LTD v WHOLESALE SEEDS LTD & SMITH [2019] NZHC 377 [8 March 2019]"}
+            {caseId: 50},
+            {caseId: 62},
+            {caseId: 104}
         ])]
     ],
 
     // make sure an exact case_name match returns only one result
     [
         '/cases?case_name=SMITH v SMITH [2019] NZHC 320 [1 March 2019]', [testNumberOfResponses(1), testResponseMatches([
-            {caseName: "SMITH v SMITH [2019] NZHC 320 [1 March 2019]"}
+            {caseId: 104}
         ])]
     ],
 
     // /cases response includes a highlighted excerpt if 'search' parameter is provided, and case_name is highlighted
     [
-	'/cases?search=police', [testResponseNotEmpty, testResponseMatches([
-	    {excerpt: /someRegexMakingSureDrivewayIsHighlighted/},
-	    {caseName: "LANGLANDS v <b>POLICE</b> [2019] NZHC 214 [20 February 2019]"}
-	])]
+	    '/cases?search=police', [testResponseNotEmpty, testResponseMatches([
+	        {excerpt: /<b>police<\/b>/i},
+	        {caseName: /<b>police<\/b>/i}
+	    ])]
     ],
 
-    // /cases response includes an excerpt with no higlights if 'search' filter is not provided
+    // /cases response does not include an excerpt field if no search param is provided
     [
-	'/cases?start=0&end=1', [testResponseMatches([
-	    {excerpt: /someRegexMakingSureNoHighlights/}
-	])]
+	    '/cases?start=0&end=1', [testNoField('excerpt')]
     ],
 
     // case_name search returns highlights in the case_name
-    todo
+    [
+        '/cases?case_name=smith', [testResponseNotEmpty, testResponseMatches([
+            {caseName: /<b>smith<\/b>/i}
+        ])]
+    ],                      
     
     // 'court' filter returns correct number of matches
     [
