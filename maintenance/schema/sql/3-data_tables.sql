@@ -35,6 +35,16 @@ ON "search".legislation_act_section_documents("section");
 CREATE INDEX idx_case_search_documents_document_case_name
 ON "search".case_search_documents(("document"->>'case_name'));
 
+CREATE INDEX idx_case_search_documents_document_court_name
+ON "search".case_search_documents(("document"->>'court_name'));
+
+CREATE INDEX idx_case_search_documents_document_date
+ON "search".case_search_documents(("document"->>'date'));
+
+CREATE INDEX idx_case_search_documents_document_legislation
+ON "search".case_search_documents
+USING GIN(("document"->'legislation'));
+
 -- insert triggers to create documents
 CREATE TRIGGER trg_create_document_vector 
 BEFORE INSERT

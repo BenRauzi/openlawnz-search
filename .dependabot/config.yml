@@ -3,3 +3,4 @@ update_configs:
   - package_manager: "javascript"
     directory: "/app"
     update_schedule: "daily"
+    target_branch: "development"
