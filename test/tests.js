@@ -67,7 +67,46 @@ var requestsAndTests = [
         '/cases?case_name=smith', [testResponseNotEmpty, testResponseMatches([
             {caseName: /<b>smith<\/b>/i}
         ])]
-    ],                      
+    ],
+
+    // 'search' filter queries  with %26 (&) between them return only cases which contain both words
+    todo
+
+    // 'search' filter queries with | between then return either left or right terms
+    todo
+    
+    // 'search' filter queries with brackets () return correct results
+    todo
+
+    // 'search' filter queries with <1> between two terms matches cases with the terms adjacent to each other
+    todo
+
+    // 'search' filter queries with a ':*' appended to search terms prefix match only 
+    todo
+
+    // 'search' filter queries with a ! appended to the search term won't return cases which include that word 
+    todo
+
+    // 'search' filter queries with terms without an operator between them act as though %26 (&) was inserted 
+    todo
+
+    // 'search' filter queries with tailing binary operators return as if the tailing operator was omitted  
+    todo
+
+    // 'search' filter queries with unbalanced brackets return as if all terms were entered with %26 between them   and with 'queryLanguage=False'
+    todo
+
+    // 'search' filter queries with conjoined operators return as if all terms were entered with %26 between them   and with 'queryLanguage=False'
+    todo
+
+    // 'search' filter queries with <1:3> between two terms matches cases with the terms adjacent to each other
+    todo
+
+    // 'search' filter queries with <1:3> between two terms matches cases with the terms within three words of each other
+    todo
+
+    // 'case_name' filter queries with %26 (&) between them return only cases with names which contain both words
+    todo
     
     // 'court' filter returns correct number of matches
     [

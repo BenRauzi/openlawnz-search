@@ -126,7 +126,11 @@ function addHeadline(field, asField, query, maxFrags, fullField) {
     if (fullField)
         minMax = ',MinWords=999,MaxWords=1000'
     
-    return pg.raw(`ts_headline(${field}, plainto_tsquery(?), 'MaxFragments=${maxFrags}${minMax}') AS ${asField}`, query)
+    return pg.raw(`ts_headline(${field}, to_tsquery(?), 'MaxFragments=${maxFrags}${minMax}') AS ${asField}`, query)
+}
+
+function parseSearch(search) {
+    return search.replace(/< : >/,
 }
 
 app.use(cors());
@@ -140,7 +144,7 @@ app.get('/legislation/acts', (req, res, next) => {
     var search = getSearchString(req);
 
     var query = pg
-        .from(pg.raw(`search.legislation_documents s, plainto_tsquery('english',?) query`, [search]))
+        .from(pg.raw(`search.legislation_documents s, to_tsquery('english',?) query`, [search]))
 
     if (search != "")
         query.whereRaw('query @@ search_document')
@@ -191,7 +195,7 @@ app.get('/cases/names', (req, res, next) => {
     var pagination = getPaginationFromQuery(req);
     var search = getSearchString(req)
     var query = pg
-        .from(pg.raw(`search.case_search_documents s, plainto_tsquery('english',?) query`, [search]))
+        .from(pg.raw(`search.case_search_documents s, to_tsquery('english',?) query`, [search]))
 
     if (search !== '')
         query.whereRaw('query @@ "case_name_search_document"')
@@ -216,7 +220,7 @@ app.get('/cases/names', (req, res, next) => {
 
 function getBaseQuery(searchTable,searchTerms) {
     var tsQueries = searchTerms
-        .map((_,idx) => `plainto_tsquery('english',?) query${idx}`)
+        .map((_,idx) => `to_tsquery('english',?) query${idx}`)
         .join()
     
     var query = pg.from(pg.raw(`${searchTable}, ${tsQueries}`, searchTerms.map(t => t[0])))
