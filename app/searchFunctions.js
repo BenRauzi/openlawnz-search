@@ -35,7 +35,7 @@ function getBaseQuery(searchTable,searchTerms) {
         var search = term[0]
         var column = term[1]
         
-        if (search !== "")
+        if (search)
             query.whereRaw(`query${idx} @@ "${column}"`)
     })
 
@@ -82,8 +82,8 @@ function getResultsList(searchQuery, countQuery, resultMapper) {
 function searchActs(pagination, search) {
     var query = pg
         .from(pg.raw(`search.legislation_documents s, plainto_tsquery('english',?) query`, [search]))
-
-    if (search != "")
+    
+    if (search)
         query.whereRaw('query @@ search_document')
 
     var countQuery = createCountQuery(query.clone())
@@ -125,7 +125,7 @@ function searchCaseNames(pagination, search) {
     var query = pg
         .from(pg.raw(`search.case_search_documents s, plainto_tsquery('english',?) query`, [search]))
 
-    if (search !== '')
+    if (search)
         query.whereRaw('query @@ "case_name_search_document"')
 
     var countQuery = createCountQuery(query.clone())
@@ -158,14 +158,12 @@ function searchCases(pagination, search, params) {
     if (params.legislation_section)
         query.whereRaw(`document->'legislation' @> ANY(ARRAY [?]::jsonb[])`,`[{"section":"${params.legislation_section}"}]`)
     if (params.judgment_date_from) {
-        var date = new Date(params.judgment_date_from)
-        if (!isNaN(date))
-            query.whereRaw("document->>'date' > ?",date)
+        if (!isNaN(params.judgment_date_from))
+            query.whereRaw("document->>'date' > ?",params.judgment_date_from)
     }
     if (params.judgment_date_to) {
-        var date = new Date(params.judgment_date_to)
-        if (!isNaN(date))
-            query.whereRaw("document->>'date' < ?",date)
+        if (!isNaN(params.judgment_date_to))
+            query.whereRaw("document->>'date' < ?",params.judgment_date_to)
     }
 
     var countQuery = createCountQuery(query.clone())

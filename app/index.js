@@ -1,51 +1,56 @@
 const express = require('express')
 const cors = require('cors')
+const swaggerUi = require('swagger-ui-express')
 const sf = require('./searchFunctions.js')
+const openApiTools = require('./openApiTools.js')
+const getOpenApiSpec = require('./openApiSpec.js')
 
 const app = express();
 const PORT = process.env.OPENLAW_SEARCH_PORT || 8085
 
 // search parameter constants
+// once 'end' parameter has been removed, these can be too
 const maxSearchLength = 160
 const maxPageSize = 50
-const defaultPageSize = 20;
+
+const spec = getOpenApiSpec({
+    getActs: (req, res) => 
+	    sf.searchActs(getPaginationFromQuery(req),req.query.search),
+
+    getActSections: (req, res) =>
+	    sf.searchActsSections(
+		getPaginationFromQuery(req),
+		req.query.search,
+		req.params.actTitle),
+
+    getCaseNames: (req, res) =>
+	    sf.searchCaseNames(getPaginationFromQuery(req),req.query.search),
+
+    getCases: (req, res) =>
+	    sf.searchCases(getPaginationFromQuery(req),req.query.search,req.query),
+}) 
+const specReadable = openApiTools.createYamlSpec(spec)
 
 function logInternalError(err,res) {
     console.error(err);
     res.status(500).send({error:'Internal server error'});
 }
 
-function getSearchString(req) {
-    var rawSearch = req.query.search
-
-    if (!rawSearch)
-        rawSearch = "";
-
-    if (rawSearch.length > maxSearchLength) {
-        return rawSearch.substring(0,maxSearchLength);
-    } else {
-        return rawSearch;
-    }
-}
-
 function getPaginationFromQuery(req) {
-    var rawStart = parseInt(req.query.start)
-    var rawEnd = parseInt(req.query.end);
+    // this function only exists to support the legacy 'end' parameter
+    // once this is deprecated, we can just rely on the OpenAPI spec argument
+    // checking
+    var rawEnd = req.query.end
 
-    var pagination = {}
-
-    if (isNaN(rawStart)) {
-        pagination.start = 0;
-    } else {
-        pagination.start = rawStart;
-    }
+    var pagination = { start: req.query.start }
     
     if (isNaN(rawEnd)) {
-        pagination.end = pagination.start+defaultPageSize;
+        pagination.end = pagination.start+req.query.count
     } else if (rawEnd > pagination.start+maxPageSize) {
-        pagination.end = pagination.start+maxPageSize;
+        pagination.end = pagination.start+maxPageSize
     } else if (rawEnd < pagination.start) {
-        pagination.end = 0;
+        pagination.end = pagination.start+req.query.count
+	console.error(pagination.end,req.query.count)
     } else {
         pagination.end = rawEnd;
     }
@@ -53,9 +58,9 @@ function getPaginationFromQuery(req) {
     return pagination
 }
 
-function handleSearchQuery(resultsPromise, next, res)
+function handleSearchQuery(handleFunction, req, res, next)
 {
-    resultsPromise
+    handleFunction(req,res)
 	.then(results => {
 	    res
 		.status(200)
@@ -68,39 +73,14 @@ function handleSearchQuery(resultsPromise, next, res)
 
 app.use(cors());
 
+app.use('/openapi/docs', swaggerUi.serve, swaggerUi.setup(spec))
+
+app.get('/openapi/spec', (req,res,next) => res.set('Content-Type','text/plain').send(specReadable))
+
 app.use(function(err, req, res, next) {
     logInternalError(err,res);
 })
 
-app.get('/legislation/acts', (req, res, next) => {
-    handleSearchQuery(
-	sf.searchActs(getPaginationFromQuery(req),getSearchString(req)),
-	next, res
-    )
-})
+openApiTools.addRoutes(app,spec,handleSearchQuery)
 
-app.get('/legislation/acts/:actTitle/sections', (req, res, next) => {
-    handleSearchQuery(
-	sf.searchActsSections(
-	    getPaginationFromQuery(req),
-	    getSearchString(req),
-	    req.params.actTitle ? req.params.actTitle : ""),
-	next,res
-    )
-})
-
-app.get('/cases/names', (req, res, next) => {
-    handleSearchQuery(
-	sf.searchCaseNames(getPaginationFromQuery(req),getSearchString(req)),
-	next,res
-    )
-})
-
-app.get('/cases', (req, res, next) => {
-    handleSearchQuery(
-	sf.searchCases(getPaginationFromQuery(req),getSearchString(req),req.query),
-	next,res
-    )
-})
-
-app.listen(PORT, () => { `Running on port ${PORT}` });
+app.listen(PORT, () => { `Running on port ${PORT}` })
