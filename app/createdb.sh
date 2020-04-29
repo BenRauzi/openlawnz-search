@@ -1,11 +1,18 @@
 #! /bin/sh
 
 echoerr () {
-    echo $1 1>&2
+   $VERBOSE  && echo $1 1>&2
 }
 
+VERBOSE=false
+if [ "$1" == "-v" ]; then
+    VERBOSE=true
+fi
+
+export PGPASSWORD=$DB_PASS
+
 echoerr "Creating DB container"
-docker run --rm  --name pg -e POSTGRES_PASSWORD=$DB_PASS -d -p 5432:5432 postgres >/dev/null
+docker run --rm  --name pg-openlaw-search-testdb -e POSTGRES_PASSWORD=$DB_PASS -d -p 5432:5432 postgres >/dev/null
 
 echoerr "Waiting for docker to spin up DB..."
 
@@ -22,3 +29,5 @@ do
 done
 
 echoerr "...DB is spun up"
+
+exit 0
