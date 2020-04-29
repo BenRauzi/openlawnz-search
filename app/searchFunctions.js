@@ -58,7 +58,7 @@ function getResultsList(searchQuery, countQuery, resultMapper) {
             
             return countQuery
                 .then(countRows => {
-                    var totalCount = countRows[0].count
+                    var totalCount = parseInt(countRows[0].count)
 
                     return {
                         total: totalCount,

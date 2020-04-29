@@ -1,34 +1,42 @@
 {
-   "name": "openlawnz-search",
-   "version": "1.1.0",
-   "description": "API for openlawnz search engine",
-   "main": "index.js",
-   "scripts": {
-      "start": "node index.js",
-      "createdb": "source ./defaultenv.sh && sh createdb.sh && npm run builddb",
-      "startcreatedb": "source ./defaultenv.sh && npm run createdb && npm start; docker container stop pg",
-      "builddb": "npx ol-search-maintenance schema-rebuild -f && npm run addcases",
-      "addcases": "npx ol-search-maintenance add-cases ../test/documents.json"
-   },
-   "repository": {
-      "type": "git",
-      "url": "git+https://github.com/openlawnz/openlawnz-search.git"
-   },
-   "author": "Ed Haslam",
-   "license": "GPL-3.0",
-   "bugs": {
-      "url": "https://github.com/openlawnz/openlawnz-search/issues"
-   },
-   "homepage": "https://github.com/openlawnz/openlawnz-search#readme",
-   "dependencies": {
-      "cors": "^2.8.5",
-      "express": "^4.17.1",
-      "js-yaml": "^3.13.1",
-      "knex": "^0.21.0",
-       "pg": "^8.0.2",
-      "swagger-ui-express": "^4.1.4"
-   },
-   "devDependencies": {
-      "maintenance": "file:../maintenance"
-   }
+    "name": "openlawnz-search",
+    "version": "1.1.0",
+    "description": "API for openlawnz search engine",
+    "main": "index.js",
+    "scripts": {
+	"start": "node index.js",
+	"createdb": "source ./defaultenv.sh && sh createdb.sh && npm run builddb",
+	"startcreatedb": "source ./defaultenv.sh && npm run --silent createdb && npm run --silent addcases && npm start; npm run stopDB",
+	"builddb": "npx ol-search-maintenance schema-rebuild -f",
+	"stopDB": "docker container stop pg-openlaw-search-testdb",
+	"addcases": "npx ol-search-maintenance add-cases test/integration/data/standardDocuments.ndjson",
+	"test": "npm run integrationTest",
+	"integrationTest": "source ./defaultenv.sh && npm run createdb && npx mocha test/integration/ --exit; npm run --silent stopDB",
+	"unitTest": ""
+    },
+    "repository": {
+	"type": "git",
+	"url": "git+https://github.com/openlawnz/openlawnz-search.git"
+    },
+    "author": "Ed Haslam",
+    "license": "GPL-3.0",
+    "bugs": {
+	"url": "https://github.com/openlawnz/openlawnz-search/issues"
+    },
+    "homepage": "https://github.com/openlawnz/openlawnz-search#readme",
+    "dependencies": {
+	"cors": "^2.8.5",
+	"express": "^4.17.1",
+	"js-yaml": "^3.13.1",
+	"knex": "^0.21.0",
+	"pg": "^8.0.2",
+	"swagger-ui-express": "^4.1.4"
+    },
+    "devDependencies": {
+	"chai": "^4.2.0",
+	"chai-quantifiers": "^1.0.9",
+	"maintenance": "file:../maintenance",
+	"mocha": "^7.1.1",
+	"supertest": "^4.0.2"
+    }
 }
