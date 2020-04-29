@@ -73,9 +73,9 @@ function handleSearchQuery(handleFunction, req, res, next)
 
 app.use(cors());
 
-app.use('/openapi/docs', swaggerUi.serve, swaggerUi.setup(spec))
+app.use('/docs/v1/ui', swaggerUi.serve, swaggerUi.setup(spec))
 
-app.get('/openapi/spec', (req,res,next) => res.set('Content-Type','text/plain').send(specReadable))
+app.get('/docs/v1/spec', (req,res,next) => res.set('Content-Type','text/plain').send(specReadable))
 
 app.use(function(err, req, res, next) {
     logInternalError(err,res);
@@ -84,3 +84,5 @@ app.use(function(err, req, res, next) {
 openApiTools.addRoutes(app,spec,handleSearchQuery)
 
 app.listen(PORT, () => { `Running on port ${PORT}` })
+
+module.exports = app

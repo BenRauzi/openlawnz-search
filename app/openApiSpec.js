@@ -5,7 +5,7 @@ module.exports = f => ({
         description: "Find legal cases from the OpenLawNZ database"
     },
     servers: [{
-	url: '/v1/',
+	url: '/api/v1/',
 	description: 'API v1 endpoint. This is the recommended endpoint to use'
     },{
 	url: '/',
