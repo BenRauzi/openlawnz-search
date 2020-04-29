@@ -8,8 +8,7 @@ const preaddir = ut.promisify(fs.readdir)
 const preadFile = ut.promisify(fs.readFile)
 const pool = dbFuncs.getDbPool()
 
-function deploy() {
-    const onError = (err) => createErrorMessage("Schema rebuild",err)
+function deploy(verbose=true) {
     const sqlDir = path.join(path.dirname(fs.realpathSync(__filename)),'schema/sql')
     return preaddir(sqlDir)
         .then(names => Promise.all(
@@ -22,22 +21,9 @@ function deploy() {
               .map(x => ';\n'+x.content)
               .join('\r\n'))
         .then(content => {
-            pool
+            return pool
                 .raw(content)
-                .then(_ => {
-                    console.error("Schema rebuild complete")
-                    process.exit()
-                })
-                .catch(err => {
-                    onError(err)
-                    console.error(content)
-                })
         })
-}
-
-function createErrorMessage(process,err) {
-    console.error(`${process} failed`)
-    console.error(err)
 }
 
 function addCases(cases) {
@@ -48,43 +34,45 @@ function addCases(cases) {
 }
 
 
-function addCasesFromFile(filename) {
+function addCasesFromFile(filename, printVerbose=true) {
     var readInterface = rl.createInterface({
         input: fs.createReadStream(filename),
         console: false
     })
-    
-    var sem = 10
-    var closed = false
-    
-    readInterface.on('close', () => {
-        closed = true
+
+    return new Promise((resolve,reject) => {
+	var sem = 10
+	var closed = false
 	
-        if (sem==10)
-            process.exit()
-    })
-    
-    readInterface.on('line', line => {
-        var jsonLine = JSON.parse(line)
-        sem -= 1
+	readInterface.on('close', () => {
+            closed = true
+	    
+            if (sem==10)
+		resolve()
+	})
 	
-        if (sem==0)
-            readInterface.pause()
-	
-        addCases(jsonLine)
-            .then(_ => {
-                console.error(`Read up to ${jsonLine[jsonLine.length-1].case_id}`)
-		
-                sem += 1
-                readInterface.resume()
-		
-                if (sem==10 && closed)
-                    process.exit()
-            })
-            .catch(err => {
-                console.log(err)
-                process.exit(1)
-            })
+	readInterface.on('line', line => {
+            var jsonLine = JSON.parse(line)
+            sem -= 1
+	    
+            if (sem==0)
+		readInterface.pause()
+	    
+            addCases(jsonLine)
+		.then(_ => {
+		    if (printVerbose)
+			console.error(`Read up to ${jsonLine[jsonLine.length-1].case_id}`)
+		    
+                    sem += 1
+                    readInterface.resume()
+		    
+                    if (sem==10 && closed)
+			resolve()
+		})
+		.catch(err => {
+                    reject(err)
+		})
+	})
     })
 }
 
