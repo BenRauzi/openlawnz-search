@@ -2,7 +2,8 @@ module.exports = f => ({
     openapi: "3.0.0",
     info: {
         title: "openlawnz-search",
-        description: "Find legal cases from the OpenLawNZ database"
+        description: "Find legal cases from the OpenLawNZ database",
+	version: "1"
     },
     servers: [{
 	url: '/api/v1/',
@@ -11,7 +12,6 @@ module.exports = f => ({
 	url: '/',
 	description: 'This is the default endpoint. It maps to v1 of the API. This endpoint is deprecated'
     }],
-    produces: ["application/json"],
     components: {
 	schemas: {
 	    response: {
@@ -104,6 +104,7 @@ module.exports = f => ({
 		"parameters": createRequestSchema([
 		    {
 			name: 'actTitle',
+			required: true,
 			'in': 'path',
 			schema: {
 			    type: 'string',
@@ -327,10 +328,12 @@ function createResponseSchema(responseEntrySchema) {
 	description: "OK",
 	content: {
 	    'application/json': {
-		allOf: [
-		    { $ref: '#/components/schemas/response' },
-		    { results: responseEntrySchema }
-		]
+		schema: {
+		    allOf: [
+			{ $ref: '#/components/schemas/response' },
+			{ type: 'object', properties: { results: responseEntrySchema } }
+		    ]
+		}
 	    }
 	}
     }
