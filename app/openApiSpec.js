@@ -231,6 +231,14 @@ module.exports = f => ({
 			    }
 			}
 		    }, {
+			name: 'highlight_case_name',
+			'in': 'query',
+			schema: {
+			    type: 'boolean',
+			    default: false
+			},
+			description: `Allow excerpt highlighting in the caseName response field, in HTML`,
+		    }, {
 			name: 'legislation_act',
 			'in': 'query',
 			schema: {
@@ -303,6 +311,7 @@ module.exports = f => ({
 			    },
 			    caseName: {
 				type: 'string',
+				description: 'This field will include html <b> tags if highlight_case_name is true',
 				example: "LAVERY v LAVERY [2019] NZHC 502 [20 March 2019]"
 			    },
 			    citation: {
@@ -314,6 +323,10 @@ module.exports = f => ({
 				format: 'date',
 				description: 'Judgment date of the case',
 				example: '2019-03-20'
+			    },
+			    excerpt: {
+				type: 'string',
+				description: 'Excerpt of the matching case text, with matching terms in bold'
 			    }
 			}
 		    })
@@ -331,7 +344,15 @@ function createResponseSchema(responseEntrySchema) {
 		schema: {
 		    allOf: [
 			{ $ref: '#/components/schemas/response' },
-			{ type: 'object', properties: { results: responseEntrySchema } }
+			{
+			    type: 'object',
+			    properties: {
+				results: {
+				    type: 'array',
+				    items: responseEntrySchema
+				}
+			    }
+			}
 		    ]
 		}
 	    }

@@ -50,6 +50,19 @@ function equalsJson(query,field,string) {
     query.whereRaw(`document->>'${field}' = ?`,string)
 }
 
+function addHeadline(field, asField, query, maxFrags) {
+    var options = ''
+    if (options==0)
+        options = 'HighlightAll=TRUE'
+    else
+	options = 'MaxFragments=${maxFrags}';
+	
+    
+    return pg.raw(
+	`ts_headline(${field}, plainto_tsquery(?), '${options}') AS ${asField}`, query)
+}
+
+
 function getResultsList(searchQuery, countQuery, resultMapper) {
     return searchQuery
         .then(rows => {
@@ -91,10 +104,13 @@ function searchActs(pagination, search) {
         .select(pg.raw(`ts_rank_cd('{0.5,0.7,0.9,1.0}',search_document,query) AS RANK`))
         .select(`s.title`)
 
+    if (search)
+	searchQuery.select(addHeadline(`s.title`,'highlighted_title',search,0))
+
     return getResultsList(
         searchQuery,
         countQuery,
-        (row) => { return { actName: row.title  }}
+        (row) => { return { actName: row.highlighted_title==null ? row.title : row.highlighted_title  }}
     )
 }
 
@@ -171,12 +187,21 @@ function searchCases(pagination, search, params) {
         .select(pg.raw(`ts_rank_cd('{0.5,0.7,0.9,1.0}',"full_text_search_document",query0) AS RANK`))
         .select('document')
 
+    if (search) {
+        searchQuery.select(addHeadline(`document->'case_text'`,'excerpt',search,2))
+	if (params.highlight_case_name)
+	    searchQuery.select(addHeadline(`document->'case_name'`,'case_name',search,0))
+    } else if (params.highlight_case_name && params.case_name) {
+	searchQuery.select(addHeadline(`document->'case_name'`,'case_name',params.case_name,0))
+    }
+
     var resultMapper = row => {
         return {
             caseId: row.document.case_id,
-            caseName: row.document.case_name,
+            caseName: row.case_name ? row.case_name : row.document.case_name,
             citation: row.document.citation,
-            date: row.document.date
+            date: row.document.date,
+	    excerpt: row.excerpt
         }
     }
     
