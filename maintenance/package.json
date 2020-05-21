@@ -1,15 +1,19 @@
 {
-  "name": "maintenance",
-  "version": "1.1.0",
-  "description": "App for internal maintenance of search component. ",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Ed Haslam",
-  "license": "ISC",
-  "dependencies": {
-    "knex": "^0.19.5",
-    "pg": "^7.12.1"
-  }
+    "name": "maintenance",
+    "version": "1.1.0",
+    "description": "App for internal maintenance of search component. ",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Ed Haslam",
+    "license": "ISC",
+    "bin": {
+        "ol-search-maintenance": "cli.js"
+    },
+    "dependencies": {
+        "knex": "^0.21.1",
+        "pg": "^8.0.3"
+    }
 }
