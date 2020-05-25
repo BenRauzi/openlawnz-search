@@ -27,7 +27,7 @@
     "dependencies": {
         "cors": "^2.8.5",
         "express": "^4.17.1",
-        "js-yaml": "^3.13.1",
+        "js-yaml": "^3.14.0",
         "knex": "^0.21.1",
         "pg": "^8.2.1",
         "swagger-ui-express": "^4.1.4"
